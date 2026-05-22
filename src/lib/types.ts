@@ -12,17 +12,21 @@ export type PlantCatalog = {
   growingTips: string | null;
 };
 
+export type Location = {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+};
+
 export type MyPlant = {
   id: number;
   name: string;
   catalogPlantId: number;
   status: string;
   plantedDate: string | null;
-  location: string | null;
+  locationId: number | null;
   potSizeLiters: number | null;
-  potNotes: string | null;
-  waterSchedule: string | null;
-  waterNotes: string | null;
   notes: string | null;
   successNotes: string | null;
   problemNotes: string | null;
@@ -74,11 +78,8 @@ export type PlantFormData = {
   catalogPlantId: number;
   status: string;
   plantedDate: string | null;
-  location: string | null;
+  locationId: number | null;
   potSizeLiters: number | null;
-  potNotes: string | null;
-  waterSchedule: string | null;
-  waterNotes: string | null;
   notes: string | null;
   successNotes: string | null;
   problemNotes: string | null;

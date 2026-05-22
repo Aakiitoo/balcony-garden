@@ -27,7 +27,10 @@ function EditPlantContent() {
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold text-emerald-950">Edit {data.plant.name}</h1>
-      <PlantForm plant={data.plant} />
+      <p className="text-sm text-stone-600">
+        Update any detail — type, location, notes, and what is or is not working.
+      </p>
+      <PlantForm mode="edit" plant={data.plant} />
     </div>
   );
 }

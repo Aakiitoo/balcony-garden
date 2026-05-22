@@ -9,11 +9,13 @@ import {
   FlaskConical,
   Users,
   LayoutDashboard,
+  MapPin,
 } from "lucide-react";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/plants", label: "My Plants", icon: Sprout },
+  { href: "/locations", label: "Locations", icon: MapPin },
   { href: "/guides/sunlight", label: "Sunlight", icon: Sun },
   { href: "/guides/diseases", label: "Diseases", icon: Bug },
   { href: "/guides/fertilizers", label: "Fertilizers", icon: FlaskConical },

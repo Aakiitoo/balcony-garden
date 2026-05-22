@@ -6,7 +6,8 @@ import { Suspense } from "react";
 import { getMyPlants } from "@/lib/store";
 import { useStoreVersion } from "@/hooks/use-store";
 import { STATUS_LABELS } from "@/lib/labels";
-import { Plus, MapPin, Droplets } from "lucide-react";
+import { PlantListItem } from "@/components/PlantListItem";
+import { Plus } from "lucide-react";
 
 function PlantsContent() {
   useStoreVersion();
@@ -16,15 +17,24 @@ function PlantsContent() {
 
   const filters = [
     { value: "", label: "All" },
-    { value: "active", label: "Growing" },
+    { value: "active", label: "Growing now" },
     { value: "planned", label: "Planned" },
     { value: "harvested", label: "Harvested" },
   ];
 
+  const title =
+    status === "active"
+      ? "Growing now"
+      : status === "planned"
+        ? "Planned"
+        : status === "harvested"
+          ? "Harvested"
+          : "All plants";
+
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-emerald-950">My plants</h1>
+        <h1 className="text-2xl font-bold text-emerald-950">{title}</h1>
         <Link
           href="/plants/new"
           className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800"
@@ -52,43 +62,18 @@ function PlantsContent() {
 
       {plants.length === 0 ? (
         <p className="rounded-xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-stone-500">
-          No plants yet.{" "}
+          {status
+            ? `No plants with status “${STATUS_LABELS[status] ?? status}”.`
+            : "No plants yet."}{" "}
           <Link href="/plants/new" className="font-medium text-emerald-700 hover:underline">
-            Add your first plant
+            Add a plant
           </Link>
         </p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
           {plants.map((p) => (
             <li key={p.id}>
-              <Link
-                href={`/plants/detail?id=${p.id}`}
-                className="block rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <h2 className="font-semibold text-stone-900">{p.name}</h2>
-                  <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
-                    {STATUS_LABELS[p.status] ?? p.status}
-                  </span>
-                </div>
-                {p.location && (
-                  <p className="mt-2 flex items-center gap-1 text-sm text-stone-600">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {p.location}
-                  </p>
-                )}
-                {p.waterSchedule && (
-                  <p className="mt-1 flex items-center gap-1 text-sm text-stone-600">
-                    <Droplets className="h-3.5 w-3.5" />
-                    {p.waterSchedule}
-                  </p>
-                )}
-                {p.plantedDate && (
-                  <p className="mt-2 text-xs text-stone-500">
-                    Planted / planned: {p.plantedDate}
-                  </p>
-                )}
-              </Link>
+              <PlantListItem plant={p} />
             </li>
           ))}
         </ul>
