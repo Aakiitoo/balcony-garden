@@ -25,25 +25,25 @@ export default function DashboardPage() {
     {
       href: "/guides/sunlight",
       title: "Sunlight needs",
-      desc: "Light needs for your linked plant types only",
+      desc: "Look up light needs by plant type",
       icon: Sun,
     },
     {
       href: "/guides/diseases",
       title: "Diseases & pests",
-      desc: "Pests & diseases relevant to what you grow",
+      desc: "Diseases and pests by plant type",
       icon: Bug,
     },
     {
       href: "/guides/fertilizers",
       title: "Fertilizers",
-      desc: "Feeding advice for your plants only",
+      desc: "Fertilizer schedules and N-P-K explained",
       icon: FlaskConical,
     },
     {
       href: "/guides/companions",
       title: "Pot companions",
-      desc: "Pot pairings involving your plant types",
+      desc: "What to grow together in pots",
       icon: Users,
     },
   ];

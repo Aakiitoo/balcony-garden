@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { getLocations, getPlantsByLocation } from "@/lib/store";
 import { useStoreVersion } from "@/hooks/use-store";
+import { formatLocationSunlight } from "@/lib/labels";
 import { MapPin, Plus } from "lucide-react";
 
 export default function LocationsPage() {
@@ -50,6 +51,9 @@ export default function LocationsPage() {
                   <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
                   <div>
                     <h2 className="font-semibold text-stone-900">{loc.name}</h2>
+                    <p className="mt-0.5 text-xs text-amber-800">
+                      {formatLocationSunlight(loc)}
+                    </p>
                     {loc.description && (
                       <p className="mt-1 line-clamp-2 text-sm text-stone-600">
                         {loc.description}

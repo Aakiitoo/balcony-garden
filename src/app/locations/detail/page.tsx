@@ -2,16 +2,13 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import {
-  getLocation,
-  getPlantsByLocation,
-  deleteLocation,
-} from "@/lib/store";
+import { Suspense, useState } from "react";
+import { getLocation, getPlantsByLocation } from "@/lib/store";
 import { useRefreshStore, useStoreVersion } from "@/hooks/use-store";
 import { PlantListItem } from "@/components/PlantListItem";
-import { STATUS_LABELS } from "@/lib/labels";
-import { Pencil, Trash2 } from "lucide-react";
+import { DeleteLocationModal } from "@/components/DeleteLocationModal";
+import { STATUS_LABELS, formatLocationSunlight } from "@/lib/labels";
+import { Pencil } from "lucide-react";
 import type { MyPlant } from "@/lib/types";
 
 const STATUS_ORDER = ["active", "planned", "harvested"] as const;
@@ -33,6 +30,7 @@ function LocationDetailContent() {
   const location = id ? getLocation(id) : null;
   const plants = location ? getPlantsByLocation(location.id) : [];
   const groups = groupPlants(plants);
+  const [showDelete, setShowDelete] = useState(false);
 
   if (!location) {
     return (
@@ -45,23 +43,14 @@ function LocationDetailContent() {
     );
   }
 
-  function handleDelete() {
-    if (
-      confirm(
-        `Delete "${location!.name}"? Plants here will have their location cleared.`,
-      )
-    ) {
-      deleteLocation(location!.id);
-      refresh();
-      router.push("/locations");
-    }
-  }
-
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-emerald-950">{location.name}</h1>
+          <p className="mt-1 text-sm font-medium text-amber-800">
+            {formatLocationSunlight(location)}
+          </p>
           {location.description && (
             <p className="mt-2 max-w-xl text-stone-600">{location.description}</p>
           )}
@@ -76,10 +65,9 @@ function LocationDetailContent() {
           </Link>
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={() => setShowDelete(true)}
             className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
           >
-            <Trash2 className="h-4 w-4" />
             Delete
           </button>
         </div>
@@ -105,6 +93,17 @@ function LocationDetailContent() {
             </ul>
           </section>
         ))
+      )}
+
+      {showDelete && (
+        <DeleteLocationModal
+          location={location}
+          onClose={() => setShowDelete(false)}
+          onDeleted={() => {
+            refresh();
+            router.push("/locations");
+          }}
+        />
       )}
     </div>
   );

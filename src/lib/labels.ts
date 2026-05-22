@@ -29,3 +29,11 @@ export const CATEGORY_LABELS: Record<string, string> = {
   fruit: "Fruit",
   herb: "Herb",
 };
+
+export function formatLocationSunlight(loc: {
+  sunlightMode: "full_shade" | "hours";
+  sunlightHours: number | null;
+}): string {
+  if (loc.sunlightMode === "full_shade") return "Full shade";
+  return `${loc.sunlightHours ?? "?"} hours / day`;
+}

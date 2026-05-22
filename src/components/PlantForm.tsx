@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { STATUS_LABELS } from "@/lib/labels";
 import type { MyPlant } from "@/lib/types";
@@ -24,6 +25,7 @@ export function PlantForm({ mode, plant }: PlantFormProps) {
   const catalog = getCatalogPlants();
   const locations = getLocations();
   const isEdit = mode === "edit";
+  const [status, setStatus] = useState(plant?.status ?? "active");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -80,7 +82,8 @@ export function PlantForm({ mode, plant }: PlantFormProps) {
           <span className="text-sm font-medium text-stone-700">Status</span>
           <select
             name="status"
-            defaultValue={plant?.status ?? "active"}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
             className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"
           >
             {Object.entries(STATUS_LABELS).map(([k, v]) => (
@@ -177,6 +180,29 @@ export function PlantForm({ mode, plant }: PlantFormProps) {
               placeholder="Pests, bolting, too much sun, lessons learned..."
             />
           </label>
+          {status === "active" && (
+            <div className="rounded-xl border border-violet-200 bg-violet-50/40 p-4 space-y-4">
+              <p className="text-sm font-medium text-violet-900">Fertilizing</p>
+              <label className="block">
+                <span className="text-sm text-stone-700">Last fertilized</span>
+                <input
+                  type="date"
+                  name="lastFertilizedDate"
+                  defaultValue={plant?.lastFertilizedDate ?? ""}
+                  className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"
+                />
+              </label>
+              <label className="block">
+                <span className="text-sm text-stone-700">Fertilizer used</span>
+                <input
+                  name="lastFertilizerUsed"
+                  defaultValue={plant?.lastFertilizerUsed ?? ""}
+                  className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"
+                  placeholder="e.g. Tomato feed, compost tea"
+                />
+              </label>
+            </div>
+          )}
         </>
       )}
 

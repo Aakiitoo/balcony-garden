@@ -8,7 +8,7 @@ import { useRefreshStore, useStoreVersion } from "@/hooks/use-store";
 import { ImageUpload } from "@/components/ImageUpload";
 import { PlantGuidePanel } from "@/components/PlantGuidePanel";
 import { STATUS_LABELS } from "@/lib/labels";
-import { Pencil, Trash2, Package } from "lucide-react";
+import { Pencil, Trash2, Package, FlaskConical } from "lucide-react";
 
 function PlantDetailContent() {
   useStoreVersion();
@@ -109,6 +109,27 @@ function PlantDetailContent() {
                 <dd className="whitespace-pre-wrap">{plant.notes}</dd>
               </div>
             )}
+            {plant.status === "active" &&
+              (plant.lastFertilizedDate || plant.lastFertilizerUsed) && (
+                <div className="flex gap-2">
+                  <FlaskConical className="mt-0.5 h-4 w-4 text-violet-500" />
+                  <div>
+                    <dt className="text-stone-500">Last fertilized</dt>
+                    {plant.lastFertilizedDate && (
+                      <dd className="font-medium">{plant.lastFertilizedDate}</dd>
+                    )}
+                    {plant.lastFertilizerUsed && (
+                      <dd className="text-stone-600">{plant.lastFertilizerUsed}</dd>
+                    )}
+                    <Link
+                      href={`/plants/edit?id=${plant.id}`}
+                      className="mt-1 inline-block text-xs text-emerald-700 hover:underline"
+                    >
+                      Update
+                    </Link>
+                  </div>
+                </div>
+              )}
           </dl>
         </section>
 

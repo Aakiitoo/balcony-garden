@@ -1,4 +1,10 @@
-import type { MyPlant, PlantImage, PlantFormData, Location } from "@/lib/types";
+import type {
+  MyPlant,
+  PlantImage,
+  PlantFormData,
+  Location,
+  LocationFormData,
+} from "@/lib/types";
 import { plantCatalog } from "@/lib/data/reference";
 
 const STORAGE_KEY = "balcony-garden-v2";
@@ -56,6 +62,8 @@ function migrateV1(raw: string): Persisted {
         id,
         name: trimmed,
         description: null,
+        sunlightMode: "hours",
+        sunlightHours: 6,
         createdAt: new Date().toISOString(),
       });
       locationNameToId.set(trimmed.toLowerCase(), id);
@@ -82,6 +90,8 @@ function migrateV1(raw: string): Persisted {
         notes: (p.notes as string) || null,
         successNotes: (p.successNotes as string) || null,
         problemNotes: (p.problemNotes as string) || null,
+        lastFertilizedDate: null,
+        lastFertilizerUsed: null,
         createdAt: String(p.createdAt),
         updatedAt: String(p.updatedAt ?? p.createdAt),
       });
@@ -95,11 +105,46 @@ function migrateV1(raw: string): Persisted {
   return data;
 }
 
+function normalizeLocation(loc: Location & Partial<Location>): Location {
+  const mode = loc.sunlightMode === "full_shade" ? "full_shade" : "hours";
+  return {
+    id: loc.id,
+    name: loc.name,
+    description: loc.description ?? null,
+    sunlightMode: mode,
+    sunlightHours:
+      mode === "full_shade"
+        ? null
+        : Math.min(10, Math.max(1, loc.sunlightHours ?? 6)),
+    createdAt: loc.createdAt,
+  };
+}
+
+function normalizePlant(p: MyPlant & Partial<MyPlant>): MyPlant {
+  return {
+    ...p,
+    lastFertilizedDate: p.lastFertilizedDate ?? null,
+    lastFertilizerUsed: p.lastFertilizerUsed ?? null,
+  };
+}
+
+function normalizeData(parsed: Persisted): Persisted {
+  return {
+    ...parsed,
+    locations: (parsed.locations ?? []).map((l) =>
+      normalizeLocation(l as Location),
+    ),
+    myPlants: (parsed.myPlants ?? []).map((p) =>
+      normalizePlant(p as MyPlant),
+    ),
+  };
+}
+
 function load(): Persisted {
   if (typeof window === "undefined") return empty();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return { ...empty(), ...JSON.parse(raw) };
+    if (raw) return normalizeData({ ...empty(), ...JSON.parse(raw) });
     const legacy = localStorage.getItem(LEGACY_KEY);
     if (legacy) {
       const migrated = migrateV1(legacy);
@@ -127,13 +172,29 @@ export function getLocation(id: number): Location | null {
   return load().locations.find((l) => l.id === id) ?? null;
 }
 
-export function createLocation(name: string, description?: string): number {
+export function parseLocationForm(formData: FormData): LocationFormData {
+  const mode = formData.get("sunlightMode") as "full_shade" | "hours";
+  const hoursRaw = formData.get("sunlightHours");
+  return {
+    name: String(formData.get("name") || "").trim(),
+    description: String(formData.get("description") || "").trim() || null,
+    sunlightMode: mode === "full_shade" ? "full_shade" : "hours",
+    sunlightHours:
+      mode === "full_shade"
+        ? null
+        : Math.min(10, Math.max(1, Number(hoursRaw) || 6)),
+  };
+}
+
+export function createLocation(form: LocationFormData): number {
   const data = load();
   const id = data.nextLocationId;
   data.locations.push({
     id,
-    name: name.trim(),
-    description: description?.trim() || null,
+    name: form.name,
+    description: form.description,
+    sunlightMode: form.sunlightMode,
+    sunlightHours: form.sunlightHours,
     createdAt: new Date().toISOString(),
   });
   data.nextLocationId += 1;
@@ -141,29 +202,37 @@ export function createLocation(name: string, description?: string): number {
   return id;
 }
 
-export function updateLocation(
-  id: number,
-  name: string,
-  description?: string,
-) {
+export function updateLocation(id: number, form: LocationFormData) {
   const data = load();
   const idx = data.locations.findIndex((l) => l.id === id);
   if (idx === -1) return;
   data.locations[idx] = {
     ...data.locations[idx],
-    name: name.trim(),
-    description: description?.trim() || null,
+    name: form.name,
+    description: form.description,
+    sunlightMode: form.sunlightMode,
+    sunlightHours: form.sunlightHours,
   };
   save(data);
 }
 
-export function deleteLocation(id: number) {
+/** @param moveToLocationId null = choose later, -1 handled as later in UI */
+export function deleteLocationAndReassign(
+  id: number,
+  moveToLocationId: number | null,
+) {
   const data = load();
   data.locations = data.locations.filter((l) => l.id !== id);
   for (const p of data.myPlants) {
-    if (p.locationId === id) p.locationId = null;
+    if (p.locationId === id) {
+      p.locationId = moveToLocationId;
+    }
   }
   save(data);
+}
+
+export function deleteLocation(id: number) {
+  deleteLocationAndReassign(id, null);
 }
 
 export function getPlantsByLocation(locationId: number) {
@@ -214,6 +283,8 @@ export function createPlant(form: PlantFormData): number {
     ...form,
     successNotes: form.successNotes ?? null,
     problemNotes: form.problemNotes ?? null,
+    lastFertilizedDate: form.lastFertilizedDate ?? null,
+    lastFertilizerUsed: form.lastFertilizerUsed ?? null,
     createdAt: now,
     updatedAt: now,
   });
@@ -286,11 +357,23 @@ export function parsePlantForm(
     notes: String(formData.get("notes") || "") || null,
     successNotes: null,
     problemNotes: null,
+    lastFertilizedDate: null,
+    lastFertilizerUsed: null,
   };
 
   if (mode === "edit") {
     base.successNotes = String(formData.get("successNotes") || "") || null;
     base.problemNotes = String(formData.get("problemNotes") || "") || null;
+    const status = base.status;
+    if (status === "active") {
+      base.lastFertilizedDate =
+        String(formData.get("lastFertilizedDate") || "") || null;
+      base.lastFertilizerUsed =
+        String(formData.get("lastFertilizerUsed") || "") || null;
+    } else {
+      base.lastFertilizedDate = null;
+      base.lastFertilizerUsed = null;
+    }
   }
 
   return base;

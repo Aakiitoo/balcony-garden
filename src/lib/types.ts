@@ -16,6 +16,8 @@ export type Location = {
   id: number;
   name: string;
   description: string | null;
+  sunlightMode: "full_shade" | "hours";
+  sunlightHours: number | null;
   createdAt: string;
 };
 
@@ -30,6 +32,8 @@ export type MyPlant = {
   notes: string | null;
   successNotes: string | null;
   problemNotes: string | null;
+  lastFertilizedDate: string | null;
+  lastFertilizerUsed: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -83,4 +87,13 @@ export type PlantFormData = {
   notes: string | null;
   successNotes: string | null;
   problemNotes: string | null;
+  lastFertilizedDate: string | null;
+  lastFertilizerUsed: string | null;
+};
+
+export type LocationFormData = {
+  name: string;
+  description: string | null;
+  sunlightMode: "full_shade" | "hours";
+  sunlightHours: number | null;
 };
