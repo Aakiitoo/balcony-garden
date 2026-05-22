@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getMyPlant, deletePlant } from "@/lib/actions/plants";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { getMyPlant, deletePlant } from "@/lib/store";
+import { useRefreshStore, useStoreVersion } from "@/hooks/use-store";
 import { ImageUpload } from "@/components/ImageUpload";
 import {
   STATUS_LABELS,
@@ -9,17 +13,34 @@ import {
 } from "@/lib/labels";
 import { Pencil, Trash2, Sun, Droplets, Package } from "lucide-react";
 
-export default async function PlantDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const data = await getMyPlant(Number(id));
-  if (!data) notFound();
+function PlantDetailContent() {
+  useStoreVersion();
+  const { refresh } = useRefreshStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = Number(searchParams.get("id"));
+  const data = id ? getMyPlant(id) : null;
+
+  if (!data) {
+    return (
+      <p className="text-stone-600">
+        Plant not found.{" "}
+        <Link href="/plants" className="text-emerald-700 hover:underline">
+          Back to My Plants
+        </Link>
+      </p>
+    );
+  }
 
   const { plant, images, catalog } = data;
-  const deleteAction = deletePlant.bind(null, plant.id);
+
+  function handleDelete() {
+    if (confirm(`Delete "${plant.name}"?`)) {
+      deletePlant(plant.id);
+      refresh();
+      router.push("/plants");
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -35,21 +56,20 @@ export default async function PlantDetailPage({
         </div>
         <div className="flex gap-2">
           <Link
-            href={`/plants/${plant.id}/edit`}
+            href={`/plants/edit?id=${plant.id}`}
             className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium hover:bg-stone-50"
           >
             <Pencil className="h-4 w-4" />
             Edit
           </Link>
-          <form action={deleteAction}>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </button>
         </div>
       </header>
 
@@ -170,5 +190,13 @@ export default async function PlantDetailPage({
         </div>
       )}
     </div>
+  );
+}
+
+export default function PlantDetailPage() {
+  return (
+    <Suspense>
+      <PlantDetailContent />
+    </Suspense>
   );
 }

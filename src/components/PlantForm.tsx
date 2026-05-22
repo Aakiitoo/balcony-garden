@@ -1,21 +1,41 @@
-import { createPlant, updatePlant } from "@/lib/actions/plants";
-import { STATUS_LABELS } from "@/lib/labels";
-import type { myPlants } from "@/lib/db/schema";
+"use client";
 
-type CatalogPlant = { id: number; name: string };
+import { useRouter } from "next/navigation";
+import { STATUS_LABELS } from "@/lib/labels";
+import type { MyPlant } from "@/lib/types";
+import {
+  createPlant,
+  updatePlant,
+  parsePlantForm,
+  getCatalogPlants,
+} from "@/lib/store";
+import { useRefreshStore } from "@/hooks/use-store";
 
 type PlantFormProps = {
-  catalog: CatalogPlant[];
-  plant?: typeof myPlants.$inferSelect;
+  plant?: MyPlant;
 };
 
-export function PlantForm({ catalog, plant }: PlantFormProps) {
-  const action = plant
-    ? updatePlant.bind(null, plant.id)
-    : createPlant;
+export function PlantForm({ plant }: PlantFormProps) {
+  const router = useRouter();
+  const { refresh } = useRefreshStore();
+  const catalog = getCatalogPlants();
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = parsePlantForm(new FormData(e.currentTarget));
+    if (plant) {
+      updatePlant(plant.id, form);
+      refresh();
+      router.push(`/plants/detail?id=${plant.id}`);
+    } else {
+      const id = createPlant(form);
+      refresh();
+      router.push(`/plants/detail?id=${id}`);
+    }
+  }
 
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
           <span className="text-sm font-medium text-stone-700">Plant name *</span>

@@ -2,34 +2,42 @@
 
 A personal website for tracking fruit and vegetable plants on balconies and in pots.
 
+**Live site:** [https://aakiitoo.github.io/balcony-garden/](https://aakiitoo.github.io/balcony-garden/)
+
 ## Features
 
-- **My Plants** — Log what you are growing now or plan to plant. Store planting date, location, pot size, watering schedule, photos, and general notes.
-- **Success & problem notes** — Record what is working well and what is not, per plant.
-- **Sunlight guide** — Hours needed and whether plants want direct sun, indirect light, partial shade, or shade.
-- **Diseases & pests** — Symptoms, prevention, organic treatments, chemical options, and which approach is usually better.
-- **Fertilizers** — What to use, growth stage, frequency, and application notes.
-- **Companion planting** — Plants that work well in the same pot vs combinations to avoid.
+- **My Plants** — Log what you are growing or planning. Photos, dates, pot size, watering, notes.
+- **Success & problem notes** — What works and what does not, per plant.
+- **Tailored guides** — Sunlight, diseases, fertilizers, and companions only for plant types you have added.
 
-Reference data is pre-seeded for common balcony crops (tomato, basil, strawberry, pepper, lettuce, mint, cucumber, dwarf blueberry). You can extend the database later.
+Your plant list and photos are stored in **your browser** (localStorage), so they stay on your device and are not sent to a server.
 
-## Getting started
+## Local development
 
 ```bash
-cd balcony-garden
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Data is stored locally in `data/garden.db`. Plant photos are saved in `public/uploads/`.
-
-## Production
+Preview the GitHub Pages build locally:
 
 ```bash
-npm run build
-npm start
+npm run build:pages
+npx serve out
 ```
 
-Run on a machine you control — data stays on that server’s filesystem unless you add cloud storage later.
+Then open `http://localhost:3000/balcony-garden/` (or the URL `serve` prints).
+
+## GitHub Pages deployment
+
+Pushes to `master` run `.github/workflows/deploy-pages.yml`, which builds a static export and publishes to GitHub Pages.
+
+**One-time repo setting:** On GitHub, go to **Settings → Pages → Build and deployment** and set source to **GitHub Actions**.
+
+## Data notes
+
+- Reference guides (sunlight, pests, etc.) are bundled with the app.
+- Your plants and photos live in browser storage on each device separately.
+- Clearing site data in the browser removes your plants.

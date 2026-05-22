@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
-import { getMyPlants } from "@/lib/actions/plants";
+import { getMyPlants } from "@/lib/store";
+import { useStoreVersion } from "@/hooks/use-store";
 import { Sprout, Sun, Bug, FlaskConical, Users, Plus } from "lucide-react";
 import { STATUS_LABELS } from "@/lib/labels";
 
-export default async function DashboardPage() {
-  const plants = await getMyPlants();
+export default function DashboardPage() {
+  useStoreVersion();
+  const plants = getMyPlants();
   const active = plants.filter((p) => p.status === "active");
   const planned = plants.filter((p) => p.status === "planned");
 
@@ -14,28 +18,24 @@ export default async function DashboardPage() {
       title: "Sunlight needs",
       desc: "Light needs for your linked plant types only",
       icon: Sun,
-      color: "amber",
     },
     {
       href: "/guides/diseases",
       title: "Diseases & pests",
       desc: "Pests & diseases relevant to what you grow",
       icon: Bug,
-      color: "rose",
     },
     {
       href: "/guides/fertilizers",
       title: "Fertilizers",
       desc: "Feeding advice for your plants only",
       icon: FlaskConical,
-      color: "violet",
     },
     {
       href: "/guides/companions",
       title: "Pot companions",
       desc: "Pot pairings involving your plant types",
       icon: Users,
-      color: "sky",
     },
   ];
 
@@ -47,8 +47,8 @@ export default async function DashboardPage() {
             Your balcony garden
           </h1>
           <p className="mt-2 max-w-xl text-stone-600">
-            Track pots and planters, log what works, and look up sunlight,
-            diseases, fertilizers, and companion planting.
+            Track pots and planters, log what works, and get advice tailored to
+            the plants you grow.
           </p>
         </div>
         <Link
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
             {plants.slice(0, 5).map((p) => (
               <li key={p.id}>
                 <Link
-                  href={`/plants/${p.id}`}
+                  href={`/plants/detail?id=${p.id}`}
                   className="flex items-center justify-between px-4 py-3 hover:bg-stone-50"
                 >
                   <span className="font-medium">{p.name}</span>

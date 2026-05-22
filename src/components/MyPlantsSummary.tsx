@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { MyGardenContext } from "@/lib/garden-context";
+import type { MyGardenContext } from "@/lib/garden";
 
 export function MyPlantsSummary({ ctx }: { ctx: MyGardenContext }) {
   if (!ctx.hasLinkedCatalog) return null;
@@ -15,7 +15,7 @@ export function MyPlantsSummary({ ctx }: { ctx: MyGardenContext }) {
           .map((p) => (
             <li key={p.id}>
               <Link
-                href={`/plants/${p.id}`}
+                href={`/plants/detail?id=${p.id}`}
                 className="rounded-full bg-white px-2.5 py-0.5 text-emerald-800 ring-1 ring-emerald-200 hover:bg-emerald-100"
               >
                 {p.name}
@@ -24,12 +24,6 @@ export function MyPlantsSummary({ ctx }: { ctx: MyGardenContext }) {
             </li>
           ))}
       </ul>
-      {ctx.myPlantLabels.some((p) => !p.catalogName) && (
-        <p className="mt-2 text-amber-800/90">
-          Some plants are not linked to a guide type — edit them to include their
-          recommendations.
-        </p>
-      )}
     </div>
   );
 }

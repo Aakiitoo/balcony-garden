@@ -1,10 +1,14 @@
-import { getMyFertilizers } from "@/lib/actions/guides";
+"use client";
+
+import { getMyFertilizers } from "@/lib/garden";
+import { useStoreVersion } from "@/hooks/use-store";
 import { EmptyGardenPrompt } from "@/components/EmptyGardenPrompt";
 import { MyPlantsSummary } from "@/components/MyPlantsSummary";
 import { FlaskConical } from "lucide-react";
 
-export default async function FertilizersGuidePage() {
-  const { ctx, fertilizers } = await getMyFertilizers();
+export default function FertilizersGuidePage() {
+  useStoreVersion();
+  const { ctx, fertilizers } = getMyFertilizers();
   const catalogMap = Object.fromEntries(
     ctx.catalogPlants.map((p) => [p.id, p.name]),
   );
@@ -30,7 +34,6 @@ export default async function FertilizersGuidePage() {
       {ctx.hasLinkedCatalog && (
         <>
           <MyPlantsSummary ctx={ctx} />
-
           {fertilizers.length === 0 ? (
             <p className="text-sm text-stone-500">
               No fertilizer entries for your linked types yet.

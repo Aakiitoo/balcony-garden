@@ -1,14 +1,17 @@
-import { getMyCompanions } from "@/lib/actions/guides";
+"use client";
+
+import { getMyCompanions } from "@/lib/garden";
+import { useStoreVersion } from "@/hooks/use-store";
 import { RELATIONSHIP_LABELS } from "@/lib/labels";
 import { EmptyGardenPrompt } from "@/components/EmptyGardenPrompt";
 import { MyPlantsSummary } from "@/components/MyPlantsSummary";
 import { Users, ThumbsUp, ThumbsDown } from "lucide-react";
 
-export default async function CompanionsGuidePage() {
-  const { ctx: ctxGood, companions: good } = await getMyCompanions("good");
-  const { companions: bad } = await getMyCompanions("bad");
+export default function CompanionsGuidePage() {
+  useStoreVersion();
+  const { ctx: ctxGood, companions: good } = getMyCompanions("good");
+  const { companions: bad } = getMyCompanions("bad");
   const ctx = ctxGood;
-
   const hasPairs = good.length > 0 || bad.length > 0;
 
   return (
@@ -19,8 +22,7 @@ export default async function CompanionsGuidePage() {
           Pot companions for your plants
         </h1>
         <p className="mt-2 max-w-2xl text-stone-600">
-          Pairings that involve at least one plant type you are growing — useful
-          for deciding what to put in the same pot on your balcony.
+          Pairings that involve at least one plant type you are growing.
         </p>
       </header>
 
@@ -33,11 +35,10 @@ export default async function CompanionsGuidePage() {
       {ctx.hasLinkedCatalog && (
         <>
           <MyPlantsSummary ctx={ctx} />
-
           {!hasPairs ? (
             <p className="rounded-xl border border-stone-200 bg-white px-6 py-8 text-center text-sm text-stone-600">
-              No companion pairings in the database match your current plant types
-              yet. Add more linked types (e.g. tomato + basil) to see suggestions.
+              No companion pairings match your current plant types yet. Add more
+              linked types (e.g. tomato + basil) to see suggestions.
             </p>
           ) : (
             <>
@@ -66,7 +67,6 @@ export default async function CompanionsGuidePage() {
                   </ul>
                 </section>
               )}
-
               {bad.length > 0 && (
                 <section>
                   <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-rose-800">

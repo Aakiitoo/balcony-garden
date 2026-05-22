@@ -1,11 +1,15 @@
-import { getMySunlightGuide } from "@/lib/actions/guides";
+"use client";
+
+import { getMySunlightGuide } from "@/lib/garden";
+import { useStoreVersion } from "@/hooks/use-store";
 import { SUNLIGHT_TYPE_LABELS, CATEGORY_LABELS } from "@/lib/labels";
 import { EmptyGardenPrompt } from "@/components/EmptyGardenPrompt";
 import { MyPlantsSummary } from "@/components/MyPlantsSummary";
 import { Sun } from "lucide-react";
 
-export default async function SunlightGuidePage() {
-  const { ctx, plants } = await getMySunlightGuide();
+export default function SunlightGuidePage() {
+  useStoreVersion();
+  const { ctx, plants } = getMySunlightGuide();
 
   return (
     <div className="space-y-6">
@@ -15,8 +19,7 @@ export default async function SunlightGuidePage() {
           Sunlight for your plants
         </h1>
         <p className="mt-2 max-w-2xl text-stone-600">
-          Light needs for the plant types you are actually growing — not a full
-          catalog of every crop.
+          Light needs for the plant types you are actually growing.
         </p>
       </header>
 
@@ -29,7 +32,6 @@ export default async function SunlightGuidePage() {
       {ctx.hasLinkedCatalog && (
         <>
           <MyPlantsSummary ctx={ctx} />
-
           {plants.length === 0 ? (
             <p className="text-sm text-stone-500">No sunlight data for your linked types.</p>
           ) : (

@@ -1,15 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { addPlantImage, deletePlantImage } from "@/lib/actions/plants";
+import { addPlantImage, deletePlantImage } from "@/lib/store";
+import type { PlantImage } from "@/lib/types";
+import { useRefreshStore } from "@/hooks/use-store";
 import { Trash2, Upload } from "lucide-react";
-
-type PlantImage = {
-  id: number;
-  filename: string;
-  caption: string | null;
-};
 
 export function ImageUpload({
   plantId,
@@ -18,22 +13,22 @@ export function ImageUpload({
   plantId: number;
   images: PlantImage[];
 }) {
-  const router = useRouter();
+  const { refresh } = useRefreshStore();
   const [uploading, setUploading] = useState(false);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    if (res.ok) {
-      const { filename } = await res.json();
-      await addPlantImage(plantId, filename);
-      router.refresh();
-    }
-    setUploading(false);
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        addPlantImage(plantId, reader.result);
+        refresh();
+      }
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
     e.target.value = "";
   }
 
@@ -50,6 +45,9 @@ export function ImageUpload({
           disabled={uploading}
         />
       </label>
+      <p className="text-xs text-stone-500">
+        Photos are stored in your browser on this device (not uploaded to a server).
+      </p>
       {images.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {images.map((img) => (
@@ -59,22 +57,21 @@ export function ImageUpload({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/uploads/${img.filename}`}
+                src={img.dataUrl}
                 alt={img.caption || "Plant photo"}
                 className="h-full w-full object-cover"
               />
-              <form
-                action={deletePlantImage.bind(null, img.id, plantId)}
-                className="absolute right-1 top-1 opacity-0 transition-opacity group-hover:opacity-100"
+              <button
+                type="button"
+                onClick={() => {
+                  deletePlantImage(img.id);
+                  refresh();
+                }}
+                className="absolute right-1 top-1 rounded bg-red-600/90 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700"
+                title="Remove image"
               >
-                <button
-                  type="submit"
-                  className="rounded bg-red-600/90 p-1.5 text-white hover:bg-red-700"
-                  title="Remove image"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </form>
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
           ))}
         </div>

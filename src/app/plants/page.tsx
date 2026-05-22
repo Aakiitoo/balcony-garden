@@ -1,15 +1,18 @@
+"use client";
+
 import Link from "next/link";
-import { getMyPlants } from "@/lib/actions/plants";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { getMyPlants } from "@/lib/store";
+import { useStoreVersion } from "@/hooks/use-store";
 import { STATUS_LABELS } from "@/lib/labels";
 import { Plus, MapPin, Droplets } from "lucide-react";
 
-export default async function PlantsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>;
-}) {
-  const { status } = await searchParams;
-  const plants = await getMyPlants(status);
+function PlantsContent() {
+  useStoreVersion();
+  const searchParams = useSearchParams();
+  const status = searchParams.get("status") ?? undefined;
+  const plants = getMyPlants(status);
 
   const filters = [
     { value: "", label: "All" },
@@ -59,7 +62,7 @@ export default async function PlantsPage({
           {plants.map((p) => (
             <li key={p.id}>
               <Link
-                href={`/plants/${p.id}`}
+                href={`/plants/detail?id=${p.id}`}
                 className="block rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-2">
@@ -91,5 +94,13 @@ export default async function PlantsPage({
         </ul>
       )}
     </div>
+  );
+}
+
+export default function PlantsPage() {
+  return (
+    <Suspense>
+      <PlantsContent />
+    </Suspense>
   );
 }

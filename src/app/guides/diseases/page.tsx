@@ -1,11 +1,15 @@
-import { getMyDiseases } from "@/lib/actions/guides";
+"use client";
+
+import { getMyDiseases } from "@/lib/garden";
+import { useStoreVersion } from "@/hooks/use-store";
 import { RECOMMENDATION_LABELS } from "@/lib/labels";
 import { EmptyGardenPrompt } from "@/components/EmptyGardenPrompt";
 import { MyPlantsSummary } from "@/components/MyPlantsSummary";
 import { Bug } from "lucide-react";
 
-export default async function DiseasesGuidePage() {
-  const { ctx, diseases } = await getMyDiseases();
+export default function DiseasesGuidePage() {
+  useStoreVersion();
+  const { ctx, diseases } = getMyDiseases();
   const catalogMap = Object.fromEntries(
     ctx.catalogPlants.map((p) => [p.id, p.name]),
   );
@@ -18,8 +22,7 @@ export default async function DiseasesGuidePage() {
           Diseases & pests for your plants
         </h1>
         <p className="mt-2 max-w-2xl text-stone-600">
-          Issues that affect your linked plant types, plus common balcony pests
-          when you have plants growing.
+          Issues that affect your linked plant types, plus common balcony pests.
         </p>
       </header>
 
@@ -32,7 +35,6 @@ export default async function DiseasesGuidePage() {
       {ctx.hasLinkedCatalog && (
         <>
           <MyPlantsSummary ctx={ctx} />
-
           {diseases.length === 0 ? (
             <p className="text-sm text-stone-500">No disease entries for your plants yet.</p>
           ) : (
