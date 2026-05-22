@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Balcony Garden Tracker
 
-## Getting Started
+A personal website for tracking fruit and vegetable plants on balconies and in pots.
 
-First, run the development server:
+## Features
+
+- **My Plants** — Log what you are growing now or plan to plant. Store planting date, location, pot size, watering schedule, photos, and general notes.
+- **Success & problem notes** — Record what is working well and what is not, per plant.
+- **Sunlight guide** — Hours needed and whether plants want direct sun, indirect light, partial shade, or shade.
+- **Diseases & pests** — Symptoms, prevention, organic treatments, chemical options, and which approach is usually better.
+- **Fertilizers** — What to use, growth stage, frequency, and application notes.
+- **Companion planting** — Plants that work well in the same pot vs combinations to avoid.
+
+Reference data is pre-seeded for common balcony crops (tomato, basil, strawberry, pepper, lettuce, mint, cucumber, dwarf blueberry). You can extend the database later.
+
+## Getting started
 
 ```bash
+cd balcony-garden
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Data is stored locally in `data/garden.db`. Plant photos are saved in `public/uploads/`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Production
 
-## Learn More
+```bash
+npm run build
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Run on a machine you control — data stays on that server’s filesystem unless you add cloud storage later.
