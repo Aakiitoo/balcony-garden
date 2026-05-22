@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { STATUS_LABELS } from "@/lib/labels";
+import { STATUS_LABELS, POT_STAGE_LABELS } from "@/lib/labels";
 import type { MyPlant } from "@/lib/types";
 import {
   createPlant,
@@ -142,6 +142,21 @@ export function PlantForm({ mode, plant }: PlantFormProps) {
             className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"
           />
         </label>
+        <label className="block sm:col-span-2">
+          <span className="text-sm font-medium text-stone-700">Which pot?</span>
+          <select
+            name="potStage"
+            defaultValue={plant?.potStage ?? ""}
+            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"
+          >
+            <option value="">Not specified</option>
+            {Object.entries(POT_STAGE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <label className="block">
@@ -156,6 +171,18 @@ export function PlantForm({ mode, plant }: PlantFormProps) {
 
       {isEdit && (
         <>
+          <label className="block">
+            <span className="text-sm font-medium text-rose-800">
+              Current diseases / problems
+            </span>
+            <textarea
+              name="currentProblems"
+              rows={3}
+              defaultValue={plant?.currentProblems ?? ""}
+              className="mt-1 w-full rounded-lg border border-rose-200 bg-rose-50/40 px-3 py-2"
+              placeholder="e.g. Aphids on new leaves, yellow lower leaves…"
+            />
+          </label>
           <label className="block">
             <span className="text-sm font-medium text-emerald-800">
               What is working well?

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { getLocation, getPlantsByLocation } from "@/lib/store";
 import { useRefreshStore, useStoreVersion } from "@/hooks/use-store";
+import { AssignPlannedPlant } from "@/components/AssignPlannedPlant";
 import { PlantListItem } from "@/components/PlantListItem";
 import { DeleteLocationModal } from "@/components/DeleteLocationModal";
 import { STATUS_LABELS, formatLocationSunlight } from "@/lib/labels";
@@ -72,6 +73,8 @@ function LocationDetailContent() {
           </button>
         </div>
       </header>
+
+      <AssignPlannedPlant locationId={location.id} />
 
       {groups.length === 0 ? (
         <p className="rounded-xl border border-dashed border-stone-300 bg-white px-6 py-10 text-center text-stone-500">

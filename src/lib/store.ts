@@ -92,6 +92,8 @@ function migrateV1(raw: string): Persisted {
         problemNotes: (p.problemNotes as string) || null,
         lastFertilizedDate: null,
         lastFertilizerUsed: null,
+        currentProblems: null,
+        potStage: null,
         createdAt: String(p.createdAt),
         updatedAt: String(p.updatedAt ?? p.createdAt),
       });
@@ -125,6 +127,9 @@ function normalizePlant(p: MyPlant & Partial<MyPlant>): MyPlant {
     ...p,
     lastFertilizedDate: p.lastFertilizedDate ?? null,
     lastFertilizerUsed: p.lastFertilizerUsed ?? null,
+    currentProblems: p.currentProblems ?? null,
+    potStage:
+      p.potStage === "starter" || p.potStage === "final" ? p.potStage : null,
   };
 }
 
@@ -233,6 +238,18 @@ export function deleteLocationAndReassign(
 
 export function deleteLocation(id: number) {
   deleteLocationAndReassign(id, null);
+}
+
+export function assignPlantToLocation(plantId: number, locationId: number) {
+  const data = load();
+  const idx = data.myPlants.findIndex((p) => p.id === plantId);
+  if (idx === -1) return;
+  data.myPlants[idx] = {
+    ...data.myPlants[idx],
+    locationId,
+    updatedAt: new Date().toISOString(),
+  };
+  save(data);
 }
 
 export function getPlantsByLocation(locationId: number) {
@@ -346,6 +363,7 @@ export function parsePlantForm(
       : Number(locationRaw);
 
   const potRaw = formData.get("potSizeLiters");
+  const potStageRaw = formData.get("potStage");
 
   const base: PlantFormData = {
     name: String(formData.get("name") || "").trim(),
@@ -359,11 +377,18 @@ export function parsePlantForm(
     problemNotes: null,
     lastFertilizedDate: null,
     lastFertilizerUsed: null,
+    currentProblems: null,
+    potStage:
+      potStageRaw === "starter" || potStageRaw === "final"
+        ? potStageRaw
+        : null,
   };
 
   if (mode === "edit") {
     base.successNotes = String(formData.get("successNotes") || "") || null;
     base.problemNotes = String(formData.get("problemNotes") || "") || null;
+    base.currentProblems =
+      String(formData.get("currentProblems") || "") || null;
     const status = base.status;
     if (status === "active") {
       base.lastFertilizedDate =

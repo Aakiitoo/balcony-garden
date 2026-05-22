@@ -7,8 +7,9 @@ import { getMyPlant, deletePlant } from "@/lib/store";
 import { useRefreshStore, useStoreVersion } from "@/hooks/use-store";
 import { ImageUpload } from "@/components/ImageUpload";
 import { PlantGuidePanel } from "@/components/PlantGuidePanel";
+import { GrowingDetails } from "@/components/GrowingDetails";
 import { STATUS_LABELS } from "@/lib/labels";
-import { Pencil, Trash2, Package, FlaskConical } from "lucide-react";
+import { Pencil, Trash2, ThumbsUp, ThumbsDown } from "lucide-react";
 
 function PlantDetailContent() {
   useStoreVersion();
@@ -30,6 +31,7 @@ function PlantDetailContent() {
   }
 
   const { plant, images, catalog, location } = data;
+  const editHref = `/plants/edit?id=${plant.id}`;
 
   function handleDelete() {
     if (confirm(`Delete "${plant.name}"?`)) {
@@ -62,7 +64,7 @@ function PlantDetailContent() {
         </div>
         <div className="flex gap-2">
           <Link
-            href={`/plants/edit?id=${plant.id}`}
+            href={editHref}
             className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium hover:bg-stone-50"
           >
             <Pencil className="h-4 w-4" />
@@ -85,95 +87,72 @@ function PlantDetailContent() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-stone-200 bg-white p-6">
-          <h2 className="mb-4 font-semibold">Growing details</h2>
-          <dl className="space-y-3 text-sm">
-            {plant.plantedDate && (
-              <div>
-                <dt className="text-stone-500">Planted / planned</dt>
-                <dd className="font-medium">{plant.plantedDate}</dd>
-              </div>
-            )}
-            {plant.potSizeLiters && (
-              <div className="flex gap-2">
-                <Package className="mt-0.5 h-4 w-4 text-stone-400" />
-                <div>
-                  <dt className="text-stone-500">Pot size</dt>
-                  <dd className="font-medium">{plant.potSizeLiters} L</dd>
-                </div>
-              </div>
-            )}
-            {plant.notes && (
-              <div>
-                <dt className="text-stone-500">Notes</dt>
-                <dd className="whitespace-pre-wrap">{plant.notes}</dd>
-              </div>
-            )}
-            {plant.status === "active" &&
-              (plant.lastFertilizedDate || plant.lastFertilizerUsed) && (
-                <div className="flex gap-2">
-                  <FlaskConical className="mt-0.5 h-4 w-4 text-violet-500" />
-                  <div>
-                    <dt className="text-stone-500">Last fertilized</dt>
-                    {plant.lastFertilizedDate && (
-                      <dd className="font-medium">{plant.lastFertilizedDate}</dd>
-                    )}
-                    {plant.lastFertilizerUsed && (
-                      <dd className="text-stone-600">{plant.lastFertilizerUsed}</dd>
-                    )}
-                    <Link
-                      href={`/plants/edit?id=${plant.id}`}
-                      className="mt-1 inline-block text-xs text-emerald-700 hover:underline"
-                    >
-                      Update
-                    </Link>
-                  </div>
-                </div>
-              )}
-          </dl>
-        </section>
-
+        <GrowingDetails plant={plant} editHref={editHref} />
         {catalog && (
           <PlantGuidePanel plant={plant} catalog={catalog} location={location} />
         )}
       </div>
 
-      {(plant.successNotes || plant.problemNotes) && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {plant.successNotes && (
-            <section className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-6">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="font-semibold text-emerald-900">Working well</h2>
-                <Link
-                  href={`/plants/edit?id=${plant.id}`}
-                  className="text-xs font-medium text-emerald-700 hover:underline"
-                >
-                  Edit
-                </Link>
-              </div>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-950/90">
-                {plant.successNotes}
-              </p>
-            </section>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <section
+          className={`rounded-xl border p-6 ${
+            plant.successNotes
+              ? "border-emerald-300 bg-emerald-50"
+              : "border-emerald-200/80 bg-emerald-50/40"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-emerald-900">
+              <ThumbsUp className="h-5 w-5 text-emerald-600" />
+              Working well
+            </h2>
+            <Link
+              href={editHref}
+              className="text-xs font-medium text-emerald-700 hover:underline"
+            >
+              Edit
+            </Link>
+          </div>
+          {plant.successNotes ? (
+            <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-emerald-950">
+              {plant.successNotes}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm text-emerald-800/70">
+              Nothing logged yet — edit to note what is going well.
+            </p>
           )}
-          {plant.problemNotes && (
-            <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="font-semibold text-amber-900">Not working</h2>
-                <Link
-                  href={`/plants/edit?id=${plant.id}`}
-                  className="text-xs font-medium text-emerald-700 hover:underline"
-                >
-                  Edit
-                </Link>
-              </div>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-amber-950/90">
-                {plant.problemNotes}
-              </p>
-            </section>
+        </section>
+        <section
+          className={`rounded-xl border p-6 ${
+            plant.problemNotes
+              ? "border-amber-300 bg-amber-50"
+              : "border-amber-200/80 bg-amber-50/40"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-amber-950">
+              <ThumbsDown className="h-5 w-5 text-amber-600" />
+              Not working
+            </h2>
+            <Link
+              href={editHref}
+              className="text-xs font-medium text-emerald-700 hover:underline"
+            >
+              Edit
+            </Link>
+          </div>
+          {plant.problemNotes ? (
+            <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-amber-950">
+              {plant.problemNotes}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm text-amber-900/70">
+              Nothing logged yet — edit to note what is not working.
+            </p>
           )}
-        </div>
-      )}
+        </section>
+      </div>
     </div>
   );
 }

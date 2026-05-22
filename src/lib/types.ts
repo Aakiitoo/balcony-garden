@@ -34,6 +34,8 @@ export type MyPlant = {
   problemNotes: string | null;
   lastFertilizedDate: string | null;
   lastFertilizerUsed: string | null;
+  currentProblems: string | null;
+  potStage: "starter" | "final" | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -89,6 +91,8 @@ export type PlantFormData = {
   problemNotes: string | null;
   lastFertilizedDate: string | null;
   lastFertilizerUsed: string | null;
+  currentProblems: string | null;
+  potStage: "starter" | "final" | null;
 };
 
 export type LocationFormData = {

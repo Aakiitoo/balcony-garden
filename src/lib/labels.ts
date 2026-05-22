@@ -37,3 +37,8 @@ export function formatLocationSunlight(loc: {
   if (loc.sunlightMode === "full_shade") return "Full shade";
   return `${loc.sunlightHours ?? "?"} hours / day`;
 }
+
+export const POT_STAGE_LABELS: Record<string, string> = {
+  starter: "First growing pot",
+  final: "Season pot (stays until harvest)",
+};

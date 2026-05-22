@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect } from "react";
 import { getMyPlants } from "@/lib/store";
 import { useStoreVersion } from "@/hooks/use-store";
 import { resolveCatalogId } from "@/lib/tips";
@@ -15,24 +15,35 @@ function PlantTipsPickerInner() {
   const catalogParam = searchParams.get("catalog");
   const plantParam = searchParams.get("plant");
 
-  const [mode, setMode] = useState<"type" | "mine">(
-    plantParam ? "mine" : "type",
-  );
-  const [typeId, setTypeId] = useState(catalogParam ?? "");
-  const [plantId, setPlantId] = useState(plantParam ?? "");
-
   const myPlants = getMyPlants();
+  const mode = plantParam ? "mine" : "type";
   const resolved = resolveCatalogId({ catalog: catalogParam, plant: plantParam });
 
-  function apply() {
-    const params = new URLSearchParams();
-    if (mode === "mine" && plantId) {
-      params.set("plant", plantId);
-    } else if (typeId) {
-      params.set("catalog", typeId);
+  useEffect(() => {
+    if (catalogParam || plantParam) return;
+    const firstCatalog = plantCatalog[0]?.id;
+    if (firstCatalog) {
+      router.replace(`${pathname}?catalog=${firstCatalog}`);
     }
-    const q = params.toString();
-    router.push(q ? `${pathname}?${q}` : pathname);
+  }, [catalogParam, plantParam, pathname, router]);
+
+  function navigateType(catalogId: string) {
+    router.replace(`${pathname}?catalog=${catalogId}`);
+  }
+
+  function navigatePlant(id: string) {
+    router.replace(`${pathname}?plant=${id}`);
+  }
+
+  function switchToType() {
+    const id = catalogParam ?? String(plantCatalog[0]?.id ?? "");
+    if (id) navigateType(id);
+    else router.replace(pathname);
+  }
+
+  function switchToMine() {
+    const first = myPlants[0];
+    if (first) navigatePlant(String(first.id));
   }
 
   return (
@@ -44,7 +55,7 @@ function PlantTipsPickerInner() {
             type="radio"
             name="tipMode"
             checked={mode === "type"}
-            onChange={() => setMode("type")}
+            onChange={switchToType}
           />
           Plant type
         </label>
@@ -53,7 +64,7 @@ function PlantTipsPickerInner() {
             type="radio"
             name="tipMode"
             checked={mode === "mine"}
-            onChange={() => setMode("mine")}
+            onChange={switchToMine}
             disabled={myPlants.length === 0}
           />
           One of my plants
@@ -61,11 +72,10 @@ function PlantTipsPickerInner() {
       </div>
       {mode === "type" ? (
         <select
-          value={typeId}
-          onChange={(e) => setTypeId(e.target.value)}
+          value={catalogParam ?? String(plantCatalog[0]?.id ?? "")}
+          onChange={(e) => navigateType(e.target.value)}
           className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
         >
-          <option value="">Select plant type…</option>
           {plantCatalog.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -74,11 +84,11 @@ function PlantTipsPickerInner() {
         </select>
       ) : (
         <select
-          value={plantId}
-          onChange={(e) => setPlantId(e.target.value)}
+          value={plantParam ?? (myPlants[0] ? String(myPlants[0].id) : "")}
+          onChange={(e) => navigatePlant(e.target.value)}
           className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+          disabled={myPlants.length === 0}
         >
-          <option value="">Select your plant…</option>
           {myPlants.map((p) => {
             const typeName =
               plantCatalog.find((c) => c.id === p.catalogPlantId)?.name ?? "";
@@ -90,13 +100,6 @@ function PlantTipsPickerInner() {
           })}
         </select>
       )}
-      <button
-        type="button"
-        onClick={apply}
-        className="mt-3 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
-      >
-        Show tips
-      </button>
       {resolved.catalogId && resolved.label && (
         <p className="mt-3 text-sm text-emerald-800">
           Showing tips for: <strong>{resolved.label}</strong>
