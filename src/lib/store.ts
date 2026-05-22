@@ -348,6 +348,17 @@ export function deletePlantImage(imageId: number) {
   save(data);
 }
 
+export function getPlantPreviewImage(plantId: number): string | null {
+  const data = load();
+  const images = data.images
+    .filter((i) => i.plantId === plantId)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  return images[0]?.dataUrl ?? null;
+}
+
 export function parsePlantForm(
   formData: FormData,
   mode: "add" | "edit",
